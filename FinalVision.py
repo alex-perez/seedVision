@@ -1,22 +1,33 @@
 import numpy as np
-import argparse
 import cv2
 import RPi.GPIO as GPIO
+from picamera import PiCamera
+from time import sleep
+
+def takePhoto():
+    camera.start_preview()
+    sleep(3)
+    camera.capture('/home/pi/control/picamera.jpg')
+    camera.stop_preview()
 
 # construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", help = "path to the image")
-args = vars(ap.parse_args())
 salidaCorrecta = 27
+entradaCam = 12
 
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 GPIO.setup(salidaCorrecta, GPIO.OUT)
 
+camera = PiCamera()
+
+
+
+#while True:
 # load the image
-image = cv2.imread(args["image"])
-#image = cv2.imread("seed1.jpg")
+#ret, image = video_capture.read()
+takePhoto()
+image = cv2.imread("picamera.jpg")
 image = cv2.resize(image, (0,0), fx=0.3, fy=0.3)
-#image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
 blur = cv2.GaussianBlur(image, (5,5), 0)
@@ -49,6 +60,10 @@ else:
 cv2.imshow('mask', mask)
 cv2.imshow('original', image)
 cv2.imshow('res', res)
-
-print seedCnt
+#if cv2.waitKey(1) & 0xFF == ord('q'):
+    #break
 cv2.waitKey(0)
+print seedCnt
+sleep(15)
+GPIO.cleanup()
+cv2.destroyAllWindows()
